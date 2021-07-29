@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('流程定义明细列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li class="select-time">
+                                <label>部署时间：</label>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginDeployTime]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endDeployTime]"/>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <div id="uploadBtn" class="fileinput fileinput-new" data-provides="fileinput">
+                  <span class="btn btn-outline-secondary btn-file">
+                    <span class="fileinput-new">
+                        <a class="btn btn-warning btn-sm" ><i class="fa fa-upload"></i>&nbsp;部署</a>
+                    </span>
+                    <span class="fileinput-exists">Change</span>
+                    <input type="file" name="processDefinition" multiple>
+                  </span>
+                    <span class="fileinput-filename"></span>
+                    <a href="#" class="close fileinput-exists" data-dismiss="fileinput" style="float: none">&times;</a>
+                </div>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+     <th:block th:include="include :: footer" />
+     <th:block th:include="include :: jasny-bootstrap-css" />
+     <th:block th:include="include :: jasny-bootstrap-js" />
+    <script th:inline="javascript">
+
+        var definitionId = [[${definitionId}]];
+
+        var editFlag = [[${@permission.hasPermi('business:definitionDetail:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:definitionDetail:remove')}]];
+        var prefix = ctx + "business/definitionDetail";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list/" +definitionId,
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "流程定义明细",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'definitionInfo.id',
+                    title: '流程ID',
+                    visible: false
+                },
+                {
+                    field: 'definitionInfo.name',
+                    title: '流程名称',
+                    visible: true
+                },
+                {
+                    field: 'description',
+                    title: '描述信息',
+                    visible: true
+                },
+                {
+                    field: 'deployTime',
+                    title: '部署时间'
+                },
+                {
+                    field: 'deployKey',
+                    title: '部署key',
+                    visible: true
+                },
+                {
+                    field: 'version',
+                    title: '版本号',
+                    visible: true
+                },
+                {
+                    title: '流程文件',
+                    formatter: function(value, row, index) {
+                        var url = prefix+"/readResource?deployId="+row.definitionInfo.id+"&type=xml";
+                        return '<a class="btn btn-info btn-xs " href="' + url + '" target="_blank"><i class="fa fa-search"></i></a> ';
+                    }
+                },
+                {
+                    title: '流程图',
+                    formatter: function(value, row, index) {
+                        var url = prefix+"/readResource?deployId="+row.definitionInfo.id+"&type=png";
+                        return '<a class="btn btn-info btn-xs " href="' + url + '" target="_blank"><i class="fa fa-search"></i></a> ';
+                    }
+                }
+                ]
+            };
+            $.table.init(options);
+            initUploadBtn();
+        });
+        function initUploadBtn() {
+            $('#uploadBtn').on('change.bs.fileinput ', function (e) {
+                // 处理自己的业务
+                var formData = new FormData();
+                formData.append("processDefinition", $('[name=processDefinition]')[0].files[0]);
+                formData.append("definitionId",definitionId);
+                $.ajax({
+                    url: prefix + '/deploy',
+                    data: formData,
+                    type: "post",
+                    processData: false,
+                    contentType: false,
+                    success: function(data) {
+                        $('#uploadBtn').fileinput('reset');     // 重置
+                        $.operate.ajaxSuccess(data);
+                    }
+                })
+            });
+        }
+
+
+    </script>
+</body>
+</html>

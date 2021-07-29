@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.PotentialCustomerMapper">
+    
+    <resultMap type="PotentialCustomer" id="PotentialCustomerResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="phone"    column="phone"    />
+        <result property="info"    column="info"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="followUpUser"    column="follow_up_user"    />
+        <result property="lastFollowUpTime"    column="last_follow_up_time"    />
+    </resultMap>
+
+    <sql id="selectPotentialCustomerVo">
+        select id, name, phone, info, create_time, follow_up_user, last_follow_up_time from t_potential_customer
+    </sql>
+
+    <select id="selectPotentialCustomerList" parameterType="PotentialCustomer" resultMap="PotentialCustomerResult">
+        <include refid="selectPotentialCustomerVo"/>
+        <where>
+            <if test="followUpUser != null  and followUpUser != ''"> and follow_up_user = #{followUpUser}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="phone != null  and phone != ''"> and phone like concat('%', #{phone}, '%')</if>
+        </where>
+    </select>
+    
+    <select id="selectPotentialCustomerById" parameterType="Long" resultMap="PotentialCustomerResult">
+        <include refid="selectPotentialCustomerVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectHistoryList" resultType="com.ruoyi.business.domain.FollowInfo">
+        select f.id 'followId', f.follow_up_time 'followUpTime', p.`name`, f.chat_information 'chatInformation'
+        FROM t_follow_up_record f, t_potential_customer p
+        where f.customer_id = p.id
+    </select>
+    <select id="selectPotentialCustomerByPhone" resultType="java.lang.Integer">
+        select count(*) from t_potential_customer
+        where phone = #{phone}
+    </select>
+
+    <insert id="insertPotentialCustomer" parameterType="PotentialCustomer" useGeneratedKeys="true" keyProperty="id">
+        insert into t_potential_customer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="phone != null">phone,</if>
+            <if test="info != null">info,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="followUpUser != null">follow_up_user,</if>
+            <if test="lastFollowUpTime != null">last_follow_up_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="info != null">#{info},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="followUpUser != null">#{followUpUser},</if>
+            <if test="lastFollowUpTime != null">#{lastFollowUpTime},</if>
+         </trim>
+    </insert>
+    <insert id="insertCustomerFollowInfo">
+        insert into t_follow_up_record (customer_id, chat_information, follow_up_time)
+        VALUES (#{customerId}, #{chatInformation}, #{followUpTime})
+    </insert>
+
+    <update id="updatePotentialCustomer" parameterType="PotentialCustomer">
+        update t_potential_customer
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="info != null">info = #{info},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="followUpUser != null">follow_up_user = #{followUpUser},</if>
+            <if test="lastFollowUpTime != null">last_follow_up_time = #{lastFollowUpTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deletePotentialCustomerById" parameterType="Long">
+        delete from t_potential_customer where id = #{id}
+    </delete>
+
+    <delete id="deletePotentialCustomerByIds" parameterType="String">
+        delete from t_potential_customer where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

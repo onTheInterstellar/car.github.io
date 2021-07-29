@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('审批历史')" />
+</head>
+
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var prefix = ctx + "business/carPackageAudit";
+    var instanceId=[[${instanceId}]];
+    $(function() {
+        var options = {
+            url: prefix + "/listHistory?instanceId="+instanceId,
+            sortName: "createTime",
+            sortOrder: "desc",
+            modalName: "审批历史",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            clickToSelect: false,
+            rememberSelected: false,
+            pagination: false,
+            columns: [
+                {
+                    field: 'activityId',
+                    title: '活动ID',
+                    visible: false
+                },
+                {
+                    field: 'activityName',
+                    title: '任务名称'
+                },
+                {
+                    field: 'assigneeName',
+                    title: '处理人'
+                },
+                {
+                    field: 'comment',
+                    title: '审批意见'
+                },
+                {
+                    field: 'startTime',
+                    title: '开始时间'
+                },
+                {
+                    field: 'endTime',
+                    title: '结束时间'
+                },
+                {
+                    field: 'durationInMillis',
+                    title: '耗时',
+                    formatter: function(value, row, index) {
+                        if (!value) return '未知';
+                        return formatTotalDateSub(value / 1000);
+                    }
+                }]
+        };
+        $.table.init(options);
+    });
+    /**
+     * 计算出相差天数
+     * @param secondSub
+     */
+    function formatTotalDateSub (secondSub) {
+        var days = Math.floor(secondSub / (24 * 3600));     // 计算出小时数
+        var leave1 = secondSub % (24*3600) ;                // 计算天数后剩余的毫秒数
+        var hours = Math.floor(leave1 / 3600);              // 计算相差分钟数
+        var leave2 = leave1 % (3600);                       // 计算小时数后剩余的毫秒数
+        var minutes = Math.floor(leave2 / 60);              // 计算相差秒数
+        var leave3 = leave2 % 60;                           // 计算分钟数后剩余的毫秒数
+        var seconds = Math.round(leave3);
+        return days + " 天 " + hours + " 时 " + minutes + " 分 " + seconds + ' 秒';
+    }
+</script>
+</body>
+</html>

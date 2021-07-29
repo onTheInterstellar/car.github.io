@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.StatementMapper">
+    
+    <resultMap type="Statement" id="StatementResult">
+        <result property="id"    column="id"    />
+        <result property="customerName"    column="customer_name"    />
+        <result property="customerPhone"    column="customer_phone"    />
+        <result property="actualArrivalTime"    column="actual_arrival_time"    />
+        <result property="licensePlate"    column="license_plate"    />
+        <result property="carSeries"    column="car_series"    />
+        <result property="serviceType"    column="service_type"    />
+        <result property="maintenanceId"    column="maintenance_id"    />
+        <result property="status"    column="status"    />
+        <result property="payTime"    column="pay_time"    />
+        <result property="payee.userId"    column="payee_id"    />
+        <result property="payee.userName"    column="payee_name"    />
+        <result property="totalAmount"    column="total_amount"    />
+        <result property="totalQuantity"    column="total_quantity"    />
+        <result property="discountAmount"    column="discount_amount"    />
+        <result property="info"    column="info"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+    </resultMap>
+
+    <sql id="selectStatementVo">
+        select id, customer_name, customer_phone, actual_arrival_time, license_plate, car_series, service_type, maintenance_id, status, pay_time, payee_id, total_amount, total_quantity, discount_amount, info, create_time, modify_time from t_statement
+    </sql>
+
+    <select id="selectStatementList" parameterType="Statement" resultMap="StatementResult">
+        SELECT
+        s.id,
+        s.customer_name,
+        s.customer_phone,
+        s.actual_arrival_time,
+        s.license_plate,
+        s.car_series,
+        s.service_type,
+        s.maintenance_id,
+        s.STATUS,
+        s.pay_time,
+        s.payee_id,
+        s.total_amount,
+        s.total_quantity,
+        s.discount_amount,
+        s.info,
+        u.user_name as payee_name
+        FROM
+        t_statement s
+        left join
+        sys_user u on(u.user_id = s.payee_id)
+        <where>  
+            <if test="customerName != null  and customerName != ''"> and s.customer_name like concat('%', #{customerName}, '%')</if>
+            <if test="customerPhone != null  and customerPhone != ''"> and s.customer_phone = #{customerPhone}</if>
+            <if test="licensePlate != null  and licensePlate != ''"> and s.license_plate = #{licensePlate}</if>
+        </where>
+        order by s.status,s.create_time
+    </select>
+    
+    <select id="selectStatementById" parameterType="Long" resultMap="StatementResult">
+        SELECT
+        s.id,
+        s.customer_name,
+        s.customer_phone,
+        s.actual_arrival_time,
+        s.license_plate,
+        s.car_series,
+        s.service_type,
+        s.maintenance_id,
+        s.STATUS,
+        s.pay_time,
+        s.payee_id,
+        s.total_amount,
+        s.total_quantity,
+        s.discount_amount,
+        s.info,
+        u.user_name as payee_name
+        FROM
+        t_statement s
+        left join
+        sys_user u on(u.user_id = s.payee_id)
+        where s.id = #{id}
+    </select>
+        
+    <insert id="insertStatement" parameterType="Statement" useGeneratedKeys="true" keyProperty="id">
+        insert into t_statement
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">customer_name,</if>
+            <if test="customerPhone != null">customer_phone,</if>
+            <if test="actualArrivalTime != null">actual_arrival_time,</if>
+            <if test="licensePlate != null">license_plate,</if>
+            <if test="carSeries != null">car_series,</if>
+            <if test="serviceType != null">service_type,</if>
+            <if test="maintenanceId != null">maintenance_id,</if>
+            <if test="info != null">info,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">#{customerName},</if>
+            <if test="customerPhone != null">#{customerPhone},</if>
+            <if test="actualArrivalTime != null">#{actualArrivalTime},</if>
+            <if test="licensePlate != null">#{licensePlate},</if>
+            <if test="carSeries != null">#{carSeries},</if>
+            <if test="serviceType != null">#{serviceType},</if>
+            <if test="maintenanceId != null">#{maintenanceId},</if>
+            <if test="info != null">#{info},</if>
+         </trim>
+    </insert>
+
+    <update id="updateStatement" parameterType="Statement">
+        update t_statement
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerName != null">customer_name = #{customerName},</if>
+            <if test="customerPhone != null">customer_phone = #{customerPhone},</if>
+            <if test="actualArrivalTime != null">actual_arrival_time = #{actualArrivalTime},</if>
+            <if test="licensePlate != null">license_plate = #{licensePlate},</if>
+            <if test="carSeries != null">car_series = #{carSeries},</if>
+            <if test="serviceType != null">service_type = #{serviceType},</if>
+            <if test="info != null">info = #{info},</if>
+            modify_time = now()
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteStatementById" parameterType="Long">
+        delete from t_statement where id = #{id} and status = 0
+    </delete>
+
+    <delete id="deleteStatementByIds" parameterType="String">
+        delete from t_statement where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="updateAmount">
+        update t_statement set total_amount = #{totalAmount},total_quantity=#{totalQuantity},discount_amount=#{discountAmount},modify_time=now() where id = #{statementId}
+    </update>
+    <update id="payStatement">
+        update t_statement set payee_id = #{userId},modify_time=now(),pay_time=now(),status=#{status} where id = #{statementId}
+    </update>
+    <select id="selectStatementByMainteenanceId" resultType="java.lang.Long">
+        select id from t_statement where maintenance_id = #{mainteenanceId}
+    </select>
+</mapper>

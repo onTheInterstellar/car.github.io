@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CustomerMapper">
+
+	<resultMap type="Customer" id="CustomerResult">
+		<id     property="id"        column="id"       />
+		<result property="name"      column="name"     />
+		<result property="phone"      column="phone"     />
+		<result property="sourceValue"      column="source_value"     />
+		<result property="schoolValue"        column="school_value"        />
+	</resultMap>
+	
+	<sql id="selectCustomerVo">
+        select id, name, phone, source_value, school_value 
+		from customer
+    </sql>
+	
+	<select id="selectCustomerList" parameterType="Customer" resultMap="CustomerResult">
+	    <include refid="selectCustomerVo"/>
+		<where>
+			<if test="name != null and name != ''">
+				AND name like concat('%', #{name}, '%')
+			</if>
+			<if test="sourceValue != null and sourceValue != ''">
+				AND source_value = #{sourceValue}
+			</if>
+			<if test="schoolValue != null and schoolValue != ''">
+				AND  like school_value('%', #{schoolValue}, '%')
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectCustomerAll" resultMap="CustomerResult">
+		<include refid="selectCustomerVo"/>
+	</select>
+	
+	<!--<select id="selectCustomersByUserId" parameterType="Long" resultMap="CustomerResult">
+		SELECT p.id, p.customer_name, p.customer_code
+		FROM sys_user u
+			 LEFT JOIN sys_user_customer up ON u.user_id = up.user_id
+			 LEFT JOIN customer p ON up.id = p.id
+		WHERE up.user_id = #{userId}
+	</select>-->
+	
+	<select id="selectCustomerById" parameterType="Long" resultMap="CustomerResult">
+		<include refid="selectCustomerVo"/>
+		where id = #{id}
+	</select>
+	
+	<select id="checkCustomerCodeUnique" parameterType="String" resultMap="CustomerResult">
+		<include refid="selectCustomerVo"/>
+		 where name=#{name} limit 1
+	</select>
+	
+	<select id="checkCustomerNameUnique" parameterType="String" resultMap="CustomerResult">
+		<include refid="selectCustomerVo"/>
+		 where phone=#{phone} limit 1
+	</select>
+	
+ 	<delete id="deleteCustomerByIds" parameterType="Long">
+ 		delete from customer where id in
+ 		<foreach collection="array" item="id" open="(" separator="," close=")">
+ 			#{id}
+        </foreach> 
+ 	</delete>
+ 	
+ 	<update id="updateCustomer" parameterType="Customer">
+ 		update customer
+ 		<set>
+ 			<if test="name != null and name != ''">name = #{name},</if>
+ 			<if test="phone != null and phone != ''">phone = #{phone},</if>
+ 			<if test=" sourceValue!= null and sourceValue != ''">source_value = #{sourceValue},</if>
+ 			<if test=" schoolValue!= null and schoolValue != ''">school_value = #{schoolValue}</if>
+ 		</set>
+ 		where id = #{id}
+	</update>
+ 	
+ 	<insert id="insertCustomer" parameterType="Customer" useGeneratedKeys="true" keyProperty="id">
+ 		insert into customer(
+ 			<if test="id != null and id != 0">id,</if>
+ 			<if test="name != null and name != ''">name,</if>
+ 			<if test="phone != null and phone != ''">phone,</if>
+ 			<if test="sourceValue != null and sourceValue != ''">source_value,</if>
+ 			<if test="schoolValue != null and schoolValue != ''">school_value</if>
+ 		)values(
+ 			<if test="id != null and id != 0">#{id},</if>
+ 			<if test="name != null and name != ''">#{name},</if>
+ 			<if test="phone != null and phone != ''">#{phone},</if>
+ 			<if test="sourceValue != null and sourceValue != ''">#{sourceValue},</if>
+ 			<if test="schoolValue != null and schoolValue != ''">#{schoolValue}</if>
+ 		)
+	</insert>
+
+</mapper> 

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.CarMaintenanceInfoMapper">
+    
+    <resultMap type="CarMaintenanceInfo" id="CarMaintenanceInfoResult">
+        <result property="id"    column="id"    />
+        <result property="customerName"    column="customer_name"    />
+        <result property="customerPhone"    column="customer_phone"    />
+        <result property="appointmentTime"    column="appointment_time"    />
+        <result property="actualArrivalTime"    column="actual_arrival_time"    />
+        <result property="licensePlate"    column="license_plate"    />
+        <result property="carSeries"    column="car_series"    />
+        <result property="serviceType"    column="service_type"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="info"    column="info"    />
+        <result property="status"    column="status"    />
+    </resultMap>
+
+    <sql id="selectCarMaintenanceInfoVo">
+        select id, customer_name, customer_phone, appointment_time, actual_arrival_time, license_plate, car_series, service_type, create_time, modify_time, info, status from t_car_maintenance_info
+    </sql>
+
+    <select id="selectCarMaintenanceInfoList" parameterType="CarMaintenanceInfo" resultMap="CarMaintenanceInfoResult">
+        <include refid="selectCarMaintenanceInfoVo"/>
+        <where>  
+            <if test="customerName != null  and customerName != ''"> and customer_name like concat('%', #{customerName}, '%')</if>
+            <if test="customerPhone != null and customerPhone != ''"> and customer_phone like concat('%', #{customerPhone}, '%')</if>
+            <if test="status != null "> and status = #{status}</if>
+        </where>
+        order by status asc,appointment_time desc
+    </select>
+    
+    <select id="selectCarMaintenanceInfoById" parameterType="Long" resultMap="CarMaintenanceInfoResult">
+        <include refid="selectCarMaintenanceInfoVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCarMaintenanceInfo" parameterType="CarMaintenanceInfo">
+        insert into t_car_maintenance_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">customer_name,</if>
+            <if test="customerPhone != null">customer_phone,</if>
+            <if test="appointmentTime != null">appointment_time,</if>
+            <if test="licensePlate != null">license_plate,</if>
+            <if test="carSeries != null">car_series,</if>
+            <if test="serviceType != null">service_type,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="info != null">info,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="customerName != null">#{customerName},</if>
+            <if test="customerPhone != null">#{customerPhone},</if>
+            <if test="appointmentTime != null">#{appointmentTime},</if>
+            <if test="licensePlate != null">#{licensePlate},</if>
+            <if test="carSeries != null">#{carSeries},</if>
+            <if test="serviceType != null">#{serviceType},</if>
+            now(),
+            <if test="info != null">#{info},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCarMaintenanceInfo" parameterType="CarMaintenanceInfo">
+        update t_car_maintenance_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="customerName != null">customer_name = #{customerName},</if>
+            <if test="customerPhone != null">customer_phone = #{customerPhone},</if>
+            <if test="appointmentTime != null">appointment_time = #{appointmentTime},</if>
+            <if test="licensePlate != null">license_plate = #{licensePlate},</if>
+            <if test="carSeries != null">car_series = #{carSeries},</if>
+            <if test="serviceType != null">service_type = #{serviceType},</if>
+            modify_time = now(),
+            <if test="info != null">info = #{info},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCarMaintenanceInfoById" parameterType="Long">
+        delete from t_car_maintenance_info where id = #{id} and  status = 0
+    </delete>
+
+    <delete id="deleteCarMaintenanceInfoByIds" parameterType="String">
+        delete from t_car_maintenance_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="changeStatus">
+        update t_car_maintenance_info set status = #{status} where id = #{id}
+    </update>
+    <update id="arrival">
+        update t_car_maintenance_info set status = #{status},actual_arrival_time=now() where id = #{id} and  status = 0
+    </update>
+</mapper>

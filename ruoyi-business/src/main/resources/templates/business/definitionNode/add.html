@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增流程定义节点信息')" />
+    <th:block th:include="include :: select2-css" />
+
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content">
+        <form class="form-horizontal m" id="form-definitionNode-add">
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">节点key：</label>
+                <div class="col-sm-8">
+                    <input name="nodeKey" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">    
+                <label class="col-sm-3 control-label">节点描述：</label>
+                <div class="col-sm-8">
+                    <input name="nodeDescription" class="form-control" type="text">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label">岗位选择：</label>
+                <div class="col-sm-8">
+                    <select id="auditors" class="form-control select2-multiple" multiple>
+                        <option th:each="user:${users}" th:value="${user.userId}" th:text="${user.userName}"></option>
+                    </select>
+                </div>
+            </div>
+        </form>
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: select2-js" />
+    <script th:inline="javascript">
+
+        var definitionInfoId = [[${definitionId}]];
+        var prefix = ctx + "business/definitionNode";
+        $("#form-definitionNode-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                //获取序列化数据
+                var data = $("#form-definitionNode-add").serializeArray();
+                var auditors = $.form.selectSelects("auditors");
+                data.push({"name": "auditors", "value": auditors});
+                data.push({"name": "definitionInfoId", "value": definitionInfoId});
+
+                $.operate.save(prefix + "/add", data);
+            }
+        }
+    </script>
+</body>
+</html>

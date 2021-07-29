@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:tns="http://www.activiti.org/test" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" expressionLanguage="http://www.w3.org/1999/XPath" id="m1621475460440" name="" targetNamespace="http://www.activiti.org/test" typeLanguage="http://www.w3.org/2001/XMLSchema">
+  <process id="carPackageAudit" isClosed="false" isExecutable="true" name="汽车套餐审核流程" processType="None">
+    <startEvent id="_2" name="StartEvent"/>
+    <userTask activiti:exclusive="true" id="shopOwnerAudit" name="店长审批"/>
+    <userTask activiti:exclusive="true" id="presidentAudit" name="总经理审批"/>
+    <userTask activiti:exclusive="true" id="financialAudit" name="财务审批"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_7" name="ExclusiveGateway"/>
+    <endEvent id="_8" name="EndEvent"/>
+    <sequenceFlow id="_9" sourceRef="shopOwnerAudit" targetRef="_7"/>
+    <sequenceFlow id="_10" sourceRef="_2" targetRef="shopOwnerAudit"/>
+    <userTask activiti:exclusive="true" id="reApply" name="调整申请"/>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_23" name="ExclusiveGateway"/>
+    <sequenceFlow id="_24" sourceRef="presidentAudit" targetRef="_23"/>
+    <sequenceFlow id="_25" name="不同意" sourceRef="_23" targetRef="reApply">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!presidentAudit}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_27" name="同意" sourceRef="_23" targetRef="financialAudit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${presidentAudit}]]></conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway gatewayDirection="Unspecified" id="_28" name="ExclusiveGateway"/>
+    <sequenceFlow id="_5" sourceRef="financialAudit" targetRef="_28"/>
+    <sequenceFlow id="_17" name="不同意" sourceRef="_28" targetRef="reApply">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!financialAudit}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_18" name="同意" sourceRef="_28" targetRef="_8">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${financialAudit}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_19" name="同意且金额小于5000" sourceRef="_7" targetRef="financialAudit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${shopOwnerAudit && money<5000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_20" name="同意且金额大于等于5000" sourceRef="_7" targetRef="presidentAudit">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${shopOwnerAudit && money>=5000}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_21" name="不同意" sourceRef="_7" targetRef="reApply">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!shopOwnerAudit}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="_3" sourceRef="reApply" targetRef="shopOwnerAudit"/>
+  </process>
+  <bpmndi:BPMNDiagram documentation="background=#FFFFFF;count=1;horizontalcount=1;orientation=0;width=842.4;height=1195.2;imageableWidth=832.4;imageableHeight=1185.2;imageableX=5.0;imageableY=5.0" id="Diagram-_1" name="New Diagram">
+    <bpmndi:BPMNPlane bpmnElement="carPackageAudit">
+      <bpmndi:BPMNShape bpmnElement="_2" id="Shape-_2">
+        <omgdc:Bounds height="32.0" width="32.0" x="30.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="shopOwnerAudit" id="Shape-shopOwnerAudit">
+        <omgdc:Bounds height="55.0" width="85.0" x="120.0" y="175.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="presidentAudit" id="Shape-presidentAudit">
+        <omgdc:Bounds height="55.0" width="85.0" x="560.0" y="210.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="financialAudit" id="Shape-financialAudit">
+        <omgdc:Bounds height="55.0" width="85.0" x="690.0" y="55.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_7" id="Shape-_7" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="275.0" y="185.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_8" id="Shape-_8">
+        <omgdc:Bounds height="32.0" width="32.0" x="650.0" y="390.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="reApply" id="Shape-reApply">
+        <omgdc:Bounds height="55.0" width="85.0" x="250.0" y="295.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="55.0" width="85.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_23" id="Shape-_23" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="720.0" y="220.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="_28" id="Shape-_28" isMarkerVisible="false">
+        <omgdc:Bounds height="32.0" width="32.0" x="835.0" y="330.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="32.0" width="32.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="_24" id="BPMNEdge__24" sourceElement="presidentAudit" targetElement="_23">
+        <omgdi:waypoint x="645.0" y="237.5"/>
+        <omgdi:waypoint x="720.0" y="236.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_25" id="BPMNEdge__25" sourceElement="_23" targetElement="reApply">
+        <omgdi:waypoint x="730.0" y="246.0"/>
+        <omgdi:waypoint x="730.0" y="315.0"/>
+        <omgdi:waypoint x="335.0" y="315.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_17" id="BPMNEdge__17" sourceElement="_28" targetElement="reApply">
+        <omgdi:waypoint x="839.0" y="350.0"/>
+        <omgdi:waypoint x="585.0" y="350.0"/>
+        <omgdi:waypoint x="335.0" y="350.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_27" id="BPMNEdge__27" sourceElement="_23" targetElement="financialAudit">
+        <omgdi:waypoint x="736.0" y="220.0"/>
+        <omgdi:waypoint x="736.0" y="110.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_19" id="BPMNEdge__19" sourceElement="_7" targetElement="financialAudit">
+        <omgdi:waypoint x="307.0" y="201.0"/>
+        <omgdi:waypoint x="448.0" y="128.0"/>
+        <omgdi:waypoint x="690.0" y="82.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_18" id="BPMNEdge__18" sourceElement="_28" targetElement="_8">
+        <omgdi:waypoint x="855.0" y="358.0"/>
+        <omgdi:waypoint x="855.0" y="410.0"/>
+        <omgdi:waypoint x="681.4919333848296" y="410.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_3" id="BPMNEdge__3" sourceElement="reApply" targetElement="shopOwnerAudit">
+        <omgdi:waypoint x="250.0" y="322.5"/>
+        <omgdi:waypoint x="160.0" y="285.0"/>
+        <omgdi:waypoint x="160.0" y="230.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_5" id="BPMNEdge__5" sourceElement="financialAudit" targetElement="_28">
+        <omgdi:waypoint x="775.0" y="82.5"/>
+        <omgdi:waypoint x="850.0" y="231.0"/>
+        <omgdi:waypoint x="850.0" y="331.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_9" id="BPMNEdge__9" sourceElement="shopOwnerAudit" targetElement="_7">
+        <omgdi:waypoint x="205.0" y="202.5"/>
+        <omgdi:waypoint x="275.0" y="201.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_20" id="BPMNEdge__20" sourceElement="_7" targetElement="presidentAudit">
+        <omgdi:waypoint x="307.0" y="201.0"/>
+        <omgdi:waypoint x="560.0" y="237.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_21" id="BPMNEdge__21" sourceElement="_7" targetElement="reApply">
+        <omgdi:waypoint x="291.0" y="217.0"/>
+        <omgdi:waypoint x="291.0" y="295.0"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="_10" id="BPMNEdge__10" sourceElement="_2" targetElement="shopOwnerAudit">
+        <omgdi:waypoint x="62.0" y="201.0"/>
+        <omgdi:waypoint x="120.0" y="202.5"/>
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds height="0.0" width="0.0" x="0.0" y="0.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

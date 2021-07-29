@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('审核列列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="btn-group-sm" id="toolbar" role="group">
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('business:carPackageAudit:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:carPackageAudit:remove')}]];
+        //查询数据字典
+        var statusData = [[${@dict.getType('cpa_status')}]];
+
+        var prefix = ctx + "business/carPackageAudit";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                modalName: "审核列",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'createBy',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'serviceItem.name',
+                    title: '套餐名称'
+                },
+                {
+                    field: 'serviceItem.discountPrice',
+                    title: '套餐价格'
+                },
+                {
+                    field: 'serviceItem.info',
+                    title: '套餐备注',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'createByName',
+                    title: '创建人'
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间'
+                },
+                {
+                    field: 'taskName',
+                    title: '当前任务'
+                },
+                {
+                    field: 'status',
+                    title: '审核状态',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(statusData, value);
+                    }
+                },
+                {
+                    field: 'auditors',
+                    title: '当前审核人'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="showHistoryDialog(\'' + row.instanceId + '\')"><i class="fa fa-list"></i> 审批历史</a> ');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProcessImgDialog(\'' + row.instanceId + '\')"><i class="fa fa-image"></i> 进度查看</a> ');
+                        if (row.status == 1 || row.status == 0) {
+                            actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="cancelApply(\'' + row.instanceId + '\',\'' + row.id + '\')"><i class="fa fa-times"></i> 撤销</a> ');
+                        }
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        function showProcessImgDialog(instanceId) {
+            $.modal.open("当前流程", prefix + "/processImg?instanceId=" + instanceId);
+        }
+
+        function cancelApply(instanceId, carPackageAudited) {
+            //modal.confirm 提示, 确认之后再撤销
+            $.modal.confirm("确定撤销吗？", function() {
+                //使用, operator.post(url请求地址, date, callBack可以没有)
+                $.operate.post(prefix + "/cancelApply",  { "instanceId": instanceId, "carPackageId": carPackageAudited });
+                //$.modal.msgSuccess('已删除!');
+            });
+
+        }
+    </script>
+</body>
+</html>

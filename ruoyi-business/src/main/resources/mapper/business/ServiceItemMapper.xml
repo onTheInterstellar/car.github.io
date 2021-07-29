@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.business.mapper.ServiceItemMapper">
+    
+    <resultMap type="ServiceItem" id="ServiceItemResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="originalPrice"    column="original_price"    />
+        <result property="discountPrice"    column="discount_price"    />
+        <result property="carPackage"    column="car_package"    />
+        <result property="info"    column="info"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="modifyTime"    column="modify_time"    />
+        <result property="serviceCatalog"    column="service_catalog"    />
+        <result property="auditStatus"    column="audit_status"    />
+        <result property="saleStatus"    column="sale_status"    />
+        <result property="version"    column="version"    />
+    </resultMap>
+
+    <sql id="selectServiceItemVo">
+        select id, name, original_price, discount_price, car_package, info, create_time, modify_time, service_catalog, audit_status, sale_status, version from t_service_item
+    </sql>
+
+    <select id="selectServiceItemList" parameterType="ServiceItem" resultMap="ServiceItemResult">
+        <include refid="selectServiceItemVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="carPackage != null "> and car_package = #{carPackage}</if>
+            <if test="serviceCatalog != null "> and service_catalog = #{serviceCatalog}</if>
+            <if test="auditStatus != null "> and audit_status = #{auditStatus}</if>
+            <if test="saleStatus != null "> and sale_status = #{saleStatus}</if>
+        </where>
+        order by car_package,service_catalog,id
+    </select>
+    
+    <select id="selectServiceItemById" parameterType="Long" resultMap="ServiceItemResult">
+        <include refid="selectServiceItemVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertServiceItem" parameterType="ServiceItem" useGeneratedKeys="true" keyProperty="id">
+        insert into t_service_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="originalPrice != null">original_price,</if>
+            <if test="discountPrice != null">discount_price,</if>
+            <if test="carPackage != null">car_package,</if>
+            <if test="info != null">info,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="modifyTime != null">modify_time,</if>
+            <if test="serviceCatalog != null">service_catalog,</if>
+            <if test="auditStatus != null">audit_status,</if>
+            <if test="saleStatus != null">sale_status,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="originalPrice != null">#{originalPrice},</if>
+            <if test="discountPrice != null">#{discountPrice},</if>
+            <if test="carPackage != null">#{carPackage},</if>
+            <if test="info != null">#{info},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="modifyTime != null">#{modifyTime},</if>
+            <if test="serviceCatalog != null">#{serviceCatalog},</if>
+            <if test="auditStatus != null">#{auditStatus},</if>
+            <if test="saleStatus != null">#{saleStatus},</if>
+         </trim>
+    </insert>
+
+    <update id="updateServiceItem" parameterType="ServiceItem">
+        update t_service_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="discountPrice != null">discount_price = #{discountPrice},</if>
+            <if test="info != null">info = #{info},</if>
+            modify_time = now(),
+            version = version +1,
+            <if test="serviceCatalog != null">service_catalog = #{serviceCatalog},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+        </trim>
+        where id = #{id} and sale_status = 0 and version = #{version}
+    </update>
+
+
+    <delete id="deleteServiceItemByIds" parameterType="String">
+        delete from t_service_item where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <update id="changeSaleStatus">
+        update t_service_item set sale_status = #{status}
+        where
+        id = #{id}
+        <if test="status == 1">
+            and
+            (
+            (sale_status = 0 and car_package = 0)
+            OR
+            (sale_status = 0 and car_package = 1 and audit_status = 2)
+            )
+        </if>
+
+    </update>
+    <select id="selectAllSaleOnList" parameterType="ServiceItem" resultMap="ServiceItemResult">
+        <include refid="selectServiceItemVo"/>
+        <where>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="carPackage != null "> and car_package = #{carPackage}</if>
+            <if test="serviceCatalog != null "> and service_catalog = #{serviceCatalog}</if>
+            and sale_status = 1
+        </where>
+    </select>
+    <select id="selectAuditorsByTaskKey" resultType="com.ruoyi.common.core.domain.entity.SysUser">
+        select user_id 'userId', user_name 'userName'
+        from sys_user
+        where user_id in (
+
+            select user_id
+            from t_definition_auditor
+            where node_id in (
+
+                select id
+                from t_definition_node
+                where node_key = #{taskKey}))
+    </select>
+    <update id="changeAuditStatus">
+        update t_service_item set audit_status = #{currentStatus} where id = #{id} and audit_status = #{originalStatus}
+    </update>
+    <update id="updateServiceItemNoCondition">
+        update t_service_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="originalPrice != null">original_price = #{originalPrice},</if>
+            <if test="discountPrice != null">discount_price = #{discountPrice},</if>
+            <if test="info != null">info = #{info},</if>
+            modify_time = now(),
+            <if test="serviceCatalog != null">service_catalog = #{serviceCatalog},</if>
+            <if test="auditStatus != null">audit_status = #{auditStatus},</if>
+        </trim>
+        where id = #{id} and sale_status = 0
+    </update>
+</mapper>

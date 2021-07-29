@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('跟进历史')" />
+</head>
+
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+    </div>
+</div>
+<th:block th:include="include :: footer" />
+<script th:inline="javascript">
+    var prefix = ctx + "business/potentialCustomer";
+    var customerId=[[${customerId}]];
+    $(function() {
+        var options = {
+            url: prefix + "/history?customerId="+customerId,
+            sortName: "followUpTime",
+            sortOrder: "desc",
+            modalName: "跟进历史",
+            showSearch: false,
+            showRefresh: false,
+            showToggle: false,
+            showColumns: false,
+            clickToSelect: false,
+            rememberSelected: false,
+            pagination: false,
+            columns: [
+                {
+                    field: 'followId',
+                    title: '',
+                    visible: false
+                },
+                {
+                    field: 'followUpTime',
+                    title: '跟进时间'
+                },
+                {
+                    field: 'name',
+                    title: '客户名称'
+                },
+                {
+                    field: 'chatInformation',
+                    title: '跟进内容'
+                }]
+        };
+        $.table.init(options);
+    });
+    /**
+     * 计算出相差天数
+     * @param secondSub
+     */
+</script>
+</body>
+</html>

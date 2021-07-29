@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('我的待办')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="btn-group-sm" id="toolbar" role="group">
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('business:carPackageAudit:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('business:carPackageAudit:remove')}]];
+        //查询数据字典
+        var statusData = [[${@dict.getType('cpa_status')}]];
+
+        var prefix = ctx + "business/carPackageAudit";
+
+        $(function() {
+            var options = {
+                url: prefix + "/todoList",
+                modalName: "待办列表",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field: 'serviceItem.name',
+                    title: '套餐名称'
+                },
+                {
+                    field: 'serviceItem.discountPrice',
+                    title: '套餐价格'
+                },
+                {
+                    field: 'serviceItem.info',
+                    title: '套餐备注',
+                    formatter: function(value, row, index) {
+                        return $.table.tooltip(value, 5, "open");
+                    }
+                },
+                {
+                    field: 'createByName',
+                    title: '创建人'
+                },
+                {
+                    field: 'createTime',
+                    title: '创建时间'
+                },
+                {
+                    field: 'taskName',
+                    title: '当前任务'
+                },
+                {
+                    field: 'status',
+                    title: '审核状态',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(statusData, value);
+                    }
+                },
+                {
+                    field: 'auditors',
+                    title: '当前审核人'
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        if (row.status == 0) {
+                            actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="showAuditDialog(\'' + row.taskId+'\',\'' +row.taskName + '\')"><i class="fa fa-list"></i>审核</a> ');
+                        } else {
+                            actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="openServiceItemsEditPage(\'' + row.id + '\')"><i class="fa fa-edit"></i> 修改表单</a> ');
+                            actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="reApply(\'' + row.taskId + '\', \'' + row.id + '\')"><i class="fa fa-edit"></i> 重新申请</a> ');
+                        }
+                        actions.push('<a class="btn btn-warning btn-xs" href="javascript:void(0)" onclick="showHistoryDialog(\'' + row.instanceId + '\')"><i class="fa fa-list"></i> 审批历史</a> ');
+                        actions.push('<a class="btn btn-info btn-xs" href="javascript:void(0)" onclick="showProcessImgDialog(\'' + row.instanceId + '\')"><i class="fa fa-image"></i> 进度查看</a> ');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        function openServiceItemsEditPage(id) {
+            $.modal.open("修改表单", prefix + "/serviceItemsEditPage?carPackageAuditId=" + id);
+        }
+
+        function showProcessImgDialog(instanceId) {
+            $.modal.open("当前流程", prefix + "/processImg?instanceId=" + instanceId);
+        }
+
+        function showAuditDialog(taskId, taskName) {
+            var url = prefix + "/showAuditDialog/" + taskId;
+            $.modal.open(taskName, url);
+        }
+
+        function reApply(taskId, carPackageAuditId) {
+            $.modal.confirm("是否需要重新发起该服务项审核流程?", function() {
+                $.operate.post(prefix + "/reApply", { "taskId": taskId, "carPackageAuditId": carPackageAuditId });
+            });
+        }
+
+
+
+    </script>
+</body>
+</html>
